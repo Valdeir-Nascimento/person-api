@@ -10,7 +10,8 @@ import java.util.Date;
 @Getter
 public class ExceptionResponse implements Serializable {
 
-    private Date timestamp;
+	private static final long serialVersionUID = 1L;
+	private Date timestamp;
     private String message;
     private String details;
 
