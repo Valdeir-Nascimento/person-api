@@ -1,4 +1,4 @@
-INSERT INTO `person` (`id`, `address`, `first_name`, `gender`, `last_name`) VALUES
+INSERT INTO `person` (`codigo`, `address`, `first_name`, `gender`, `last_name`) VALUES
 	(2, 'Itapuã setor III BL 11A AP 101', 'Maria', 'Female', 'Edna'),
 	(3, 'Rio Volga setor IV BL 13A AP 201', 'Elton', 'Male', 'Cesar'),
 	(4, 'Itapuã setor BL 14A AP 102', 'Adriana', 'Female', 'Oliveira'),

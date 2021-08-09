@@ -10,6 +10,9 @@ import br.com.nascimento.dto.request.PersonRequest;
 import br.com.nascimento.event.RecursoCriadoEvent;
 import br.com.nascimento.model.Person;
 import br.com.nascimento.service.PersonService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
+@Api(value = "PersonEndpoint", description = "Description for person", tags = {"Person Endpoint"})
 @RestController
 @RequestMapping(value = "/api/person/v1")
 public class PersonController {
@@ -31,11 +35,15 @@ public class PersonController {
 	private PersonRequestConverter personRequestConverter;
 	@Autowired
 	private ApplicationEventPublisher publisher;
-
+	
+	@ApiOperation(value = "Find all people recorded")
 	@GetMapping
 	public ResponseEntity<List<PersonDTO>> findAll() {
-		List<Person> personList = personService.findAll();
-		return ResponseEntity.ok().body(personDTOConverter.to(personList));
+		List<PersonDTO> personList = personDTOConverter.to(personService.findAll());
+		
+		personList.stream().forEach(p -> p.add(linkTo(methodOn(PersonController.class).findById(p.getCodigo())).withSelfRel()));
+		
+		return ResponseEntity.ok().body(personList);
 	}
 
 	@GetMapping("/{idPerson}")
@@ -49,8 +57,10 @@ public class PersonController {
 	public ResponseEntity<PersonDTO> criar(@RequestBody PersonRequest personRequest, HttpServletResponse response) {
 		Person person = personRequestConverter.to(personRequest);
 		person = personService.salvar(person);
-		publisher.publishEvent(new RecursoCriadoEvent(this, response, person.getId()));
-		return ResponseEntity.status(HttpStatus.CREATED).body(personDTOConverter.to(person));
+		publisher.publishEvent(new RecursoCriadoEvent(this, response, person.getCodigo()));
+		PersonDTO personDTO = personDTOConverter.to(person);
+		personDTO.add(linkTo(methodOn(PersonController.class).findById(person.getCodigo())).withSelfRel());
+		return ResponseEntity.status(HttpStatus.CREATED).body(personDTO);
 	}
 
 	@PutMapping("/{idPerson}")
@@ -59,7 +69,11 @@ public class PersonController {
 		Person personAtual = personService.findById(idPerson);
 		personRequestConverter.copyToProperties(personRequest, personAtual);
 		personAtual = personService.salvar(personAtual);
-		return ResponseEntity.ok().body(personDTOConverter.to(personAtual));
+		
+		PersonDTO personDTO = personDTOConverter.to(personAtual);
+		personDTO.add(linkTo(methodOn(PersonController.class).findById(personAtual.getCodigo())).withSelfRel());
+		
+		return ResponseEntity.ok().body(personDTO);
 	}
 
 	@DeleteMapping("/{idPerson}")
