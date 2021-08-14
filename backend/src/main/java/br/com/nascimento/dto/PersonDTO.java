@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 public class PersonDTO extends ResourceSupport {
 	
-    private Integer codigo;
+    private Integer key;
     private String firstName;
     private String lastName;
     private String address;

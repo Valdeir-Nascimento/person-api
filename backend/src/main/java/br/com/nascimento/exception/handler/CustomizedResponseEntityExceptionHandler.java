@@ -1,6 +1,7 @@
 package br.com.nascimento.exception.handler;
 
 import br.com.nascimento.exception.ExceptionResponse;
+import br.com.nascimento.exception.InvalidJWTAuthenticationtException;
 import br.com.nascimento.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,5 +26,12 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
         ExceptionResponse response = new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
+    
+    @ExceptionHandler(InvalidJWTAuthenticationtException.class)
+    public final ResponseEntity<ExceptionResponse> handlerInvalidJWTAuthenticationtException(Exception ex, WebRequest request) {
+        ExceptionResponse response = new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
 
 }

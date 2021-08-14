@@ -28,7 +28,9 @@ import br.com.nascimento.dto.request.BookRequest;
 import br.com.nascimento.event.RecursoCriadoEvent;
 import br.com.nascimento.model.Book;
 import br.com.nascimento.service.BookService;
+import io.swagger.annotations.Api;
 
+@Api(value = "BookEndpoint", description = "Description for book", tags = {"Book Endpoint"})
 @RestController
 @RequestMapping(value = "/api/book/v1")
 public class BookController {
@@ -61,9 +63,9 @@ public class BookController {
 	public ResponseEntity<BookDTO> criar(@RequestBody BookRequest bookRequest, HttpServletResponse response) {
 		Book book = bookRequestConverter.to(bookRequest);
 		book = bookService.salvar(book);
-		publisher.publishEvent(new RecursoCriadoEvent(this, response, book.getCodigo()));
+		publisher.publishEvent(new RecursoCriadoEvent(this, response, book.getId()));
 		BookDTO bookDTO = bookDTOConverter.to(book);
-		bookDTO.add(linkTo(methodOn(PersonController.class).findById(book.getCodigo())).withSelfRel());
+		bookDTO.add(linkTo(methodOn(PersonController.class).findById(book.getId())).withSelfRel());
 		return ResponseEntity.status(HttpStatus.CREATED).body(bookDTO);
 	}
 	
@@ -75,7 +77,7 @@ public class BookController {
 		bookAtual = bookService.salvar(bookAtual);
 		
 		BookDTO bookDTO = bookDTOConverter.to(bookAtual);
-		bookDTO.add(linkTo(methodOn(PersonController.class).findById(bookAtual.getCodigo())).withSelfRel());
+		bookDTO.add(linkTo(methodOn(PersonController.class).findById(bookAtual.getId())).withSelfRel());
 		
 		return ResponseEntity.ok().body(bookDTO);
 	}

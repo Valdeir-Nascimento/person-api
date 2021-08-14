@@ -3,6 +3,24 @@ package br.com.nascimento.controller;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
+import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
 import br.com.nascimento.dto.PersonDTO;
 import br.com.nascimento.dto.converter.PersonDTOConverter;
 import br.com.nascimento.dto.converter.PersonRequestConverter;
@@ -11,16 +29,6 @@ import br.com.nascimento.event.RecursoCriadoEvent;
 import br.com.nascimento.model.Person;
 import br.com.nascimento.service.PersonService;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletResponse;
-import java.util.List;
 
 @Api(value = "PersonEndpoint", description = "Description for person", tags = {"Person Endpoint"})
 @RestController
@@ -36,12 +44,12 @@ public class PersonController {
 	@Autowired
 	private ApplicationEventPublisher publisher;
 	
-	@ApiOperation(value = "Find all people recorded")
+	//@ApiOperation(value = "Find all people recorded")
 	@GetMapping
 	public ResponseEntity<List<PersonDTO>> findAll() {
 		List<PersonDTO> personList = personDTOConverter.to(personService.findAll());
 		
-		personList.stream().forEach(p -> p.add(linkTo(methodOn(PersonController.class).findById(p.getCodigo())).withSelfRel()));
+		personList.stream().forEach(p -> p.add(linkTo(methodOn(PersonController.class).findById(p.getKey())).withSelfRel()));
 		
 		return ResponseEntity.ok().body(personList);
 	}
@@ -57,9 +65,9 @@ public class PersonController {
 	public ResponseEntity<PersonDTO> criar(@RequestBody PersonRequest personRequest, HttpServletResponse response) {
 		Person person = personRequestConverter.to(personRequest);
 		person = personService.salvar(person);
-		publisher.publishEvent(new RecursoCriadoEvent(this, response, person.getCodigo()));
+		publisher.publishEvent(new RecursoCriadoEvent(this, response, person.getId()));
 		PersonDTO personDTO = personDTOConverter.to(person);
-		personDTO.add(linkTo(methodOn(PersonController.class).findById(person.getCodigo())).withSelfRel());
+		personDTO.add(linkTo(methodOn(PersonController.class).findById(person.getId())).withSelfRel());
 		return ResponseEntity.status(HttpStatus.CREATED).body(personDTO);
 	}
 
@@ -71,7 +79,7 @@ public class PersonController {
 		personAtual = personService.salvar(personAtual);
 		
 		PersonDTO personDTO = personDTOConverter.to(personAtual);
-		personDTO.add(linkTo(methodOn(PersonController.class).findById(personAtual.getCodigo())).withSelfRel());
+		personDTO.add(linkTo(methodOn(PersonController.class).findById(personAtual.getId())).withSelfRel());
 		
 		return ResponseEntity.ok().body(personDTO);
 	}

@@ -21,7 +21,7 @@ public class Person implements Serializable {
     @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private Integer codigo;
+    private Integer id;
     private String firstName;
     private String lastName;
     private String address;
